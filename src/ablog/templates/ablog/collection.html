@@ -1,4 +1,4 @@
-{%- extends "page.html" %} {% block body %} {% macro postlink(post) -%} {% if
+{%- extends "shibuya/page.html" %} {% block content %} {% macro postlink(post) -%} {% if
 post.external_link -%} {{- post.external_link -}} {% else %} {{-
 pathto(post.docname) }}{{ anchor(post) -}} {%- endif %} {%- endmacro %}
 <div class="section ablog__collection">
@@ -54,4 +54,5 @@ pathto(post.docname) }}{{ anchor(post) -}} {%- endif %} {%- endmacro %}
   </div>
   {% endfor %} {% endif %}
 </div>
-{% endblock body %}
+{{ super() }}
+{% endblock content %}

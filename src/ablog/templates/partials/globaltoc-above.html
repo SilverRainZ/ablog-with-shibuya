@@ -1,7 +1,25 @@
-{% if pagename in ablog %}
-{% include "ablog/postcard.html" %}
+{% if pagename in ablog or pagename.startswith(ablog.config.blog_path) %}
+
+<link
+  rel="stylesheet"
+  href="{{ pathto('_static/ablog/shibuya.css', 1) }}"
+  type="text/css"
+/>
+
+{% if ablog.fontawesome_link_cdn %}
+<link href="{{ ablog.fontawesome_link_cdn }}" rel="stylesheet" />
+{% elif ablog.fontawesome_css_file %}
+<link
+  rel="stylesheet"
+  href="{{ pathto('_static/' + ablog.fontawesome_css_file, 1) }}"
+  type="text/css"
+/>
+{% endif %}
+
+{% if pagename in ablog %}{% include "ablog/postcard.html" %}{% endif %}
 {% include "ablog/recentposts.html" %}
 {% include "ablog/tagcloud.html" %}
 {% include "ablog/categories.html" %}
 {% include "ablog/archives.html" %}
+
 {% endif %}

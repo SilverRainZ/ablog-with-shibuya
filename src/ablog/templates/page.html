@@ -6,22 +6,8 @@ extrahead %} {{ super() }} {% if feed_path %}
   href="{{ pathto(feed_path, 1) }}/atom.xml"
   title="{{ feed_title }}"
 />
-{% endif %} {% if ablog.fontawesome_link_cdn %}
-<link href="{{ ablog.fontawesome_link_cdn }}" rel="stylesheet" />
-{% elif ablog.fontawesome_css_file %}
-<link
-  rel="stylesheet"
-  href="{{ pathto('_static/' + ablog.fontawesome_css_file, 1) }}"
-  type="text/css"
-/>
 {% endif %}
-{% if pagename in ablog %}
-<link
-  rel="stylesheet"
-  href="{{ pathto('_static/ablog/shibuya.css', 1) }}"
-  type="text/css"
-/>
-{% endif %} {% endblock extrahead %} {% block content %} {{ super() }}
+{% endblock extrahead %} {% block content %} {{ super() }}
 <div class="section ablog__blog_comments">
   {% if pagename in ablog %} {% include "ablog/postnavy.html" %} {% endif %} {%
   if ablog.disqus_shortname and ablog.blog_baseurl and (not

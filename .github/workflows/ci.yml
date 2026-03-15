@@ -22,6 +22,8 @@ on:
     #        │ │ │ │ ┌───────── day of the week (0 - 6 or SUN-SAT)
     - cron: "0 7 * * *" # Every day at 07:00 UTC
 
+permissions: {}
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -37,7 +39,7 @@ jobs:
         - pandoc
         - graphviz
       envs: |
-        - linux: py313-sphinx8
+        - linux: py313-sphinx7
     secrets:
       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
@@ -57,24 +59,11 @@ jobs:
             - pandoc
             - graphviz
       envs: |
-        - macos: py312-sphinx8
-        - windows: py311-sphinx8
-        - linux: py310-sphinx8
-        - linux: py312-pydata-sphinx-theme
-        - linux: py313-devdeps
-
-  extra_tests:
-    needs: [test]
-    uses: OpenAstronomy/github-actions-workflows/.github/workflows/tox.yml@main
-    with:
-      submodules: false
-      libraries: |
-        apt:
-            - pandoc
-            - graphviz
-      envs: |
-        - linux: py312-pydata-sphinx-theme
-        - linux: py313-devdeps
+        - macos: py311-sphinx8
+        - windows: py312-sphinx8
+        - linux: py313-sphinx9
+        - linux: py313-pydata-sphinx-theme
+        - linux: py314-devdeps
 
   docs:
     needs: [core]
@@ -93,7 +82,7 @@ jobs:
   sdist_verify:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: actions/setup-python@v6
         with:
           python-version: "3.13"
@@ -106,7 +95,7 @@ jobs:
     needs: [test]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
           lfs: true
@@ -127,9 +116,7 @@ jobs:
           pytest -vvv -r a --pyargs ablog
           make tests
 
-  publish:
-    # Build wheels on PRs only when labelled. Releases will only be published if tagged ^v.*
-    # see https://github-actions-workflows.openastronomy.org/en/latest/publish.html#upload-to-pypi
+  build:
     if: |
       github.event_name != 'pull_request' ||
       (
@@ -141,5 +128,25 @@ jobs:
     with:
       python-version: "3.13"
       submodules: false
-    secrets:
-      pypi_token: ${{ secrets.PYPI_TOKEN }}
+      upload_to_pypi: false
+      save_artifacts: true
+
+  upload:
+    if: startsWith(github.ref, 'refs/tags/v')
+    name: Upload to PyPI
+    runs-on: ubuntu-latest
+    needs: [build]
+    permissions:
+      id-token: write
+    environment:
+      name: pypi
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v7
+        with:
+          merge-multiple: true
+          pattern: dist-*
+          path: dist
+
+      - name: Run upload
+        uses: pypa/gh-action-pypi-publish@release/v1
